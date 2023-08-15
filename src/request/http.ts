@@ -1,3 +1,5 @@
+import { Observer } from "@/utils/common.js"
+
 export default class Http {
     /** 下载器是否激活，激活则连续下载片段   */
     isActive: boolean = false
@@ -7,10 +9,11 @@ export default class Http {
     /** 请求的 chunk 大小，单位为 bytes */
     chunkSize: number = 1024
     totalLength: number = 0
-    chunkTimeout: number = 5000
+    chunkTimeout: number = 500
     timeoutID: number | null = null
     url: string = ''
     eof: boolean = false
+    subscript: Observer = new Observer()
     
     constructor(url?: string) {
         this.url = url || ''
@@ -39,6 +42,9 @@ export default class Http {
     
     async continuousRequest(){
         let data = await this.request()
+        this.subscript.emit('DATA-REVIEW', data)
+        
+        this.chunkStart += data.byteLength
         // 连续请求
         if (this.isActive === true && this.eof === false) {
             this.timeoutID = window.setTimeout(
@@ -49,7 +55,7 @@ export default class Http {
     }
     
     stop(){
-        
+        this.isActive = false
     }
     
     reset() {
