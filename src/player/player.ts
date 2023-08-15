@@ -1,8 +1,9 @@
-import { PlayerOptions } from "@/type/PlayerOptions.js";
+import { PlayerOptions, videoInfo } from "@/type/PlayerOptions.js";
 import { getFileFormat } from "@/utils/common.js";
 
-class Player {
+export class Player {
     readonly playerOptions: Partial<PlayerOptions>;
+    videoInfo: Partial<videoInfo> = {}
     video: HTMLVideoElement;
     
     constructor (options: Partial<PlayerOptions>){
