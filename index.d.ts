@@ -9,11 +9,16 @@ declare module 'mp4box' {
         volume: number
         track_width: number
         track_height: number
+        /** 轨道时间刻度 */
         timescale: number
+        /** 轨道（未碎片部分）的持续时间，以时间刻度为单位 */
         duration: number
+        /** 以每秒比特为单位提供轨道的比特率 */
         bitrate: number
+        /** 为此轨道提供 MIME 编解码器参数（例如“avc1.42c00d”或“mp4a.40.2” */
         codec: string
         language: string
+        /** 轨道样本（即帧）的数量 */
         nb_samples: number
     }
 
@@ -36,7 +41,7 @@ declare module 'mp4box' {
         audio: MP4AudioData
     }
 
-    type MP4Track = MP4VideoTrack | MP4AudioTrack
+    export type MP4Track = MP4VideoTrack | MP4AudioTrack
 
     export interface MP4Info {
         duration: number
@@ -67,7 +72,8 @@ declare module 'mp4box' {
         pendingInits?: number
     }
     export type MP4SourceBuffer = SourceBuffer & {
-        ms?: MP4MediaSource
+        /** 该 SourceBuffer 绑定的 MediaSource */
+        ms: MP4MediaSource
         id?: number
         segmentIndex?: number
         pendingAppends?: any[]

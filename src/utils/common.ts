@@ -8,6 +8,7 @@ export function getFileFormat(url: string){
 interface eventList{
     [key: string]: Array<Function>
 }
+/** 发布订阅 */
 export class Observer {
     list: eventList
     constructor () {
