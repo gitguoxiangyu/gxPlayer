@@ -5,7 +5,7 @@ import { Player } from "./player.js"
 
 let subscriptID: number
 
-class MediaPlayer {
+export default class MediaPlayer {
     player: Player
     mediaSource: MediaSource
     http: Http
@@ -20,11 +20,14 @@ class MediaPlayer {
         this.mp4box = MP4Box.createFile()
         this.player = player
         this.player.video.src = window.URL.createObjectURL(this.mediaSource)
+        
+        this.initEvent()
     }
     
     initEvent(){
         // 当 sourceopen 事件触发后，开始加载视频数据
         this.mediaSource.addEventListener('sourceopen',() => {
+            console.log("sourceopen")
             this.getFileBuffer()
         })
         
@@ -66,10 +69,12 @@ class MediaPlayer {
                 // pendingInits 是 MediaSource 身上的属性，所以在 i=0 时，已经初始化 pendingInits，pendingInits 必然存在
                 segmentSourceBuffer.ms.pendingInits!++
                 // 当 appendBuffer 执行完毕后，调用回调
-                segmentSourceBuffer.onupdate = this.initAppend
+                // 固定 this，如果不使用 bind 绑定，则 initAppend 的 this 对象则为 SourceBuffer
+                segmentSourceBuffer.onupdate = this.initAppend.bind(this)
             }
         }
         
+        // 当 mp4box 将视频片段分割完成时触发该事件， 参数为 track id 、 sourceBuffer 、 ArrayBuffer 、 帧数 、 是否为最后一段
         this.mp4box.onSegment = (id, user, buffer, sampleNum, is_last) => {
             let mp4SourceBuffer = user
             mp4SourceBuffer.segmentIndex!++
@@ -115,20 +120,21 @@ class MediaPlayer {
         }
     }
     
-    getFileBuffer(){
-        // 128 KB
-        this.http.chunkSize = 131584
-        
+    getFileBuffer(chunkSize = 131584){
+        // 默认大小128 KB
+        this.http.chunkSize = chunkSize
+        this.http.isActive = true
         if (subscriptID === undefined)
             // 订阅 DATA-REVIEW ，当收到视频数据时，将二进制数据交给 mp4box 解析
             subscriptID = this.http.subscript.on('DATA-REVIEW',(data: MP4ArrayBuffer)=>{
+                console.log(data)
                 data.fileStart = this.http.chunkStart
                 let nextStart = this.mp4box.appendBuffer(data,this.http.eof)
                 
                 if (this.http.eof)
                     this.mp4box.flush()
                 else
-                    this.http.chunkStart = nextStart
+                    this.http.chunkStart = nextStart - 1
             })
         this.http.continuousRequest()
     }
@@ -153,7 +159,7 @@ class MediaPlayer {
     start(){
         this.http.chunkSize = this.mp4box.seek(0,true).offset
         this.mp4box.start()
-        this.getFileBuffer()
+        this.getFileBuffer(1048576)
     }
     
 }

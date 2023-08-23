@@ -15,6 +15,10 @@ export default class Mp4Parse {
         this.url = url
         this.http = new http(url)
         this.player = player
+        // 初始化事件回调
+        this.initEvent()
+        // 加载视频流
+        this.loadFile()
     }
     
     loadFile(){
@@ -24,15 +28,19 @@ export default class Mp4Parse {
         // 订阅 DATA-REVIEW ，当收到视频数据时，将二进制数据交给 mp4box 解析
         subscriptID = this.http.subscript.on('DATA-REVIEW',(data: MP4ArrayBuffer)=>{
             data.fileStart = this.http.chunkStart
-            this.mp4box.appendBuffer(data)
+            this.http.chunkStart = this.mp4box.appendBuffer(data)
         })
+        this.http.isActive = true
         this.http.continuousRequest()
     }
     
     
     initEvent(){
         // 当 mp4 moov box 解析完成时触发该事件回调
+        // 解析完成后，停止请求，将视频信息赋给 player.videoInfo
         this.mp4box.onReady = (mp4Info) => {
+            console.log("mp4 moov box 解析完成")
+            console.log(mp4Info);
             // 停止连续请求
             this.stop()
             // 取消订阅
