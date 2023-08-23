@@ -11,7 +11,9 @@
 
 <script type="module">
     import http from './src/request/http'
+    import { Player } from './src/player/player'
     
+    new Player({streamingPlay: true}).attachSource('https://novaex.cc/fireworks.mp4')
     let htt = new http('https://novaex.cc/fireworks.mp4')
     htt.request()
 </script>

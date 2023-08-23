@@ -1,5 +1,7 @@
+import Mp4Parse from "@/mp4/mp4ParseHead.js";
 import { PlayerOptions, videoInfo } from "@/type/PlayerOptions.js";
 import { getFileFormat } from "@/utils/common.js";
+import MediaPlayer from "./MediaPlayer.js";
 
 export class Player {
     readonly playerOptions: Partial<PlayerOptions>;
@@ -31,7 +33,10 @@ export class Player {
     attachSource(url: string){
         let fileFormat = getFileFormat(url)
         if (fileFormat === 'mp4'){
-            
+            new Mp4Parse(url, this)
+            if (this.playerOptions.streamingPlay){
+                new MediaPlayer(url, this)
+            }
         }else{
             console.log("url 不合法")
         }
