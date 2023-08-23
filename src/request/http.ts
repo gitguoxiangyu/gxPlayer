@@ -9,6 +9,7 @@ export default class Http {
     /** 请求的 chunk 大小，单位为 bytes */
     chunkSize: number = 1024
     totalLength: number = 0
+    /** 请求间隔 */
     chunkTimeout: number = 500
     timeoutID: number | null = null
     url: string = ''
@@ -34,7 +35,7 @@ export default class Http {
         }
         
         // 判断视频流是否请求完毕，如果请求视频流末端，大概率 Content-Length 不等于 请求长度
-        this.eof = parseInt(res.headers.get('Content-Length') || '0') !== this.chunkSize
+        this.eof = parseInt(res.headers.get('Content-Length') || '0') - 1 !== this.chunkSize
         
         // 将获取的二进制数据转为 arrayBuffer
         return res.arrayBuffer()
@@ -44,7 +45,6 @@ export default class Http {
         let data = await this.request()
         this.subscript.emit('DATA-REVIEW', data)
         
-        this.chunkStart += data.byteLength
         // 连续请求
         if (this.isActive === true && this.eof === false) {
             this.timeoutID = window.setTimeout(
