@@ -28,6 +28,11 @@ export class Player {
     init(){
         
     }
+
+    /** 初始化 player dom 模板 */
+    initTemplate(){
+
+    }
     
     /** 给video添加媒体资源，开始初始化媒体资源的解析 */
     attachSource(url: string){
